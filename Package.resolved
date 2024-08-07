@@ -1,0 +1,33 @@
+{
+  "originHash" : "027e6b11461975248ef444c8bebe5bbc934920fc34d1edd64d3cddda58758cc8",
+  "pins" : [
+    {
+      "identity" : "lambdaspire-swift-abstractions",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Lambdaspire/Lambdaspire-Swift-Abstractions",
+      "state" : {
+        "revision" : "b5d8bf41df8ea16866f6a5e9a015cca259b87fc9",
+        "version" : "2.0.0"
+      }
+    },
+    {
+      "identity" : "lambdaspire-swift-dependencyresolution",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Lambdaspire/Lambdaspire-Swift-DependencyResolution",
+      "state" : {
+        "revision" : "fa0b3f338ebd8ed6b3152d88c144978a8dead823",
+        "version" : "2.0.0"
+      }
+    },
+    {
+      "identity" : "swift-syntax",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-syntax.git",
+      "state" : {
+        "revision" : "64889f0c732f210a935a0ad7cda38f77f876262d",
+        "version" : "509.1.1"
+      }
+    }
+  ],
+  "version" : 3
+}
