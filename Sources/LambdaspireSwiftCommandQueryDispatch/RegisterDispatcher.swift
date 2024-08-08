@@ -22,13 +22,17 @@ public class CommanQueryDispatchRegistrator {
     
     @discardableResult public func handler<T: HandlesCommand & Resolvable>(_ : T.Type) -> Self {
         registry.transient(T.self)
-        T.register(registry)
+        registry.transient(CommandHandler<T.TCommand>.self) { s in
+            .init(handle: s.resolve(T.self).handle)
+        }
         return self
     }
     
     @discardableResult public func handler<T: HandlesQuery & Resolvable>(_ : T.Type) -> Self {
         registry.transient(T.self)
-        T.register(registry)
+        registry.transient(QueryHandler<T.TQuery>.self) { s in
+            .init(handle: s.resolve(T.self).handle)
+        }
         return self
     }
     
@@ -39,4 +43,12 @@ public class CommanQueryDispatchRegistrator {
             commandHandlers.forEach { handler($0) }
             queryHandlers.forEach { handler($0) }
         }
+}
+
+struct CommandHandler<T: CQDCommand> {
+    var handle: (T) async throws -> Void
+}
+
+struct QueryHandler<T: CQDQuery> {
+    var handle: (T) async throws -> T.Value
 }

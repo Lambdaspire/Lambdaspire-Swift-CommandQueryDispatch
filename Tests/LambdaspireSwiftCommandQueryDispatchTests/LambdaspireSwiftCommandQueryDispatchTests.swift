@@ -2,7 +2,6 @@ import XCTest
 import LambdaspireAbstractions
 import LambdaspireDependencyResolution
 import LambdaspireSwiftCommandQueryDispatch
-import LambdaspireSwiftCommandQueryDispatch
 
 final class LambdaspireSwiftCommandQueryDispatchTests: XCTestCase {
     
@@ -38,11 +37,11 @@ struct TestCommand : CQDCommand {
 }
 
 @Resolvable
-class TestCommandHandler : CommandHandler<TestCommand> {
+class TestCommandHandler : HandlesCommand {
     
     let callback: TestValueCallback<Int>
     
-    override func handle(_ command: TestCommand) async throws {
+    func handle(_ command: TestCommand) async throws {
         callback(command.value)
     }
 }
@@ -54,8 +53,8 @@ struct TestQuery : CQDQuery {
 }
 
 @Resolvable
-class TestQueryHandler : QueryHandler<TestQuery> {
-    override func handle(_ query: TestQuery) async throws -> Int {
+class TestQueryHandler : HandlesQuery {
+    func handle(_ query: TestQuery) async throws -> Int {
         query.input * 100
     }
 }

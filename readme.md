@@ -81,7 +81,7 @@ model.addSomething()
 
 Define your commands, queries, and handlers as necessary.
 
-Queries implement `CQDQuery`, and query handlers extend `QueryHandler<T: CQDQuery>`.
+Queries implement `CQDQuery`, and query handlers implement `HandlesQuery`.
 
 ```swift
 struct GetInfoQuery : CQDQuery {
@@ -91,12 +91,12 @@ struct GetInfoQuery : CQDQuery {
 }
 
 @Resolvable
-class GetInfoQueryHandler : QueryHandler<GetIntoQuery> {
+class GetInfoQueryHandler : HandlesQuery {
 
     private let api: Api
     private let analytics: AnalyticsEngine
 
-    override func handle(_ query: GetInfoQuery) async throws -> MyInfoType {
+    func handle(_ query: GetInfoQuery) async throws -> MyInfoType {
         
         analytics.logSearch(subject: query.subject)
         
@@ -109,7 +109,7 @@ class GetInfoQueryHandler : QueryHandler<GetIntoQuery> {
 }
 ```
 
-Commands implement `CQDCommand`, and command handlers extend `CommandHandler<T: CQDCommand>`.
+Commands implement `CQDCommand`, and command handlers implement `HandlesCommand`.
 
 ```swift
 struct AddSomethingCommand : CQDCommand {
@@ -117,12 +117,12 @@ struct AddSomethingCommand : CQDCommand {
 }
 
 @Resolvable
-class AddSomethingCommandHandler : CommandHandler<AddSomethingCommand> {
+class AddSomethingCommandHandler : HandlesCommand {
 
     private let api: Api
     private let authorisation: AuthorisationEngine
     
-    override func handle(_ command: AddSomethingCommand) async throws {
+    func handle(_ command: AddSomethingCommand) async throws {
         
         try await authorisation.ensureAuthorisation(to: .addSomething)
         
@@ -282,11 +282,11 @@ class SomeEntity {
 struct AddEntityCommand : CQDCommand { }
 
 @Resolvable
-class AddEntityCommandHandler : CommandHandler<AddEntityCommand> {
+class AddEntityCommandHandler : HandlesCommand {
     
     private let modelContext: ModelContext
     
-    override func handle(_ command: AddEntityCommand) async throws {
+    func handle(_ command: AddEntityCommand) async throws {
         modelContext.insert(SomeEntity(name: "Entity \(Int.random(in: 100...999))"))
         try! modelContext.save()
     }
@@ -299,11 +299,11 @@ struct GetRandomEntityQuery : CQDQuery {
 }
 
 @Resolvable
-class GetRandomEntityQueryHandler : QueryHandler<GetRandomEntityQuery> {
+class GetRandomEntityQueryHandler : HandlesQuery {
     
     private let modelContext: ModelContext
     
-    override func handle(_ query: GetRandomEntityQuery) async throws -> SomeEntity {
+    func handle(_ query: GetRandomEntityQuery) async throws -> SomeEntity {
         guard let result = try modelContext.fetch(FetchDescriptor<SomeEntity>()).first else {
             throw DomainError.notFound
         }
