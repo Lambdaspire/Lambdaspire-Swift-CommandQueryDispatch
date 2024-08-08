@@ -8,17 +8,13 @@ final class LambdaspireSwiftCommandQueryDispatchTests: XCTestCase {
     
     private var dispatcher: CommandQueryDispatcher!
     
-    func testExample() async throws {
+    func testHappyPath() async throws {
         
         let b: ContainerBuilder = .init()
         
-        var value: Int = 0
+        var valueModifiedByCommand: Int = 0
         
-        b.singleton(TestValueCallback<Int>.self) {
-            {
-                value = $0
-            }
-        }
+        b.singleton(TestValueCallback<Int>.self) { { valueModifiedByCommand = $0 } }
         
         b.commandQueryDispatch().standard(
             commandHandlers: [TestCommandHandler.self],
@@ -28,11 +24,11 @@ final class LambdaspireSwiftCommandQueryDispatchTests: XCTestCase {
         
         try await c.resolve(CommandQueryDispatcher.self).dispatch(TestCommand(value: 100))
         
-        XCTAssertEqual(value, 100)
+        XCTAssertEqual(valueModifiedByCommand, 100)
         
-        let queryValue = try await c.resolve(CommandQueryDispatcher.self).dispatch(TestQuery(input: 100))
+        let queryResult = try await c.resolve(CommandQueryDispatcher.self).dispatch(TestQuery(input: 100))
         
-        XCTAssertEqual(queryValue, 10000)
+        XCTAssertEqual(queryResult, 10000)
     }
 }
 
@@ -58,8 +54,8 @@ struct TestQuery : CQDQuery {
 
 @Resolvable
 class TestQueryHandler : QueryHandler<TestQuery> {
-    override func handle(_ command: QueryHandler<TestQuery>.TQuery) async throws -> Int {
-        command.input * 100
+    override func handle(_ query: TestQuery) async throws -> Int {
+        query.input * 100
     }
 }
 
