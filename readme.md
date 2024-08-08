@@ -4,7 +4,7 @@ A lightweight Command Query Dispatch package for Swift.
 
 You may also know this pattern as Command Query Responsibility Segregation / Separation (CQRS) or more simply Command Query Segregation / Separation (CQS).
 
-Atomise your business logic and orchestration, maximise testability, and separate mutation from inquiry.
+Atomise your business logic, isolate complex orchestration, maximise testability, and separate mutation from inquiry.
 
 ## Usage
 
@@ -175,7 +175,6 @@ There's no reason you can't use SwiftData with this. You just need to find a way
 Here's an naive end-to-end example using a few other Lambdaspire packages:
 
 ```swift
-
 import SwiftUI
 import SwiftData
 import LambdaspireAbstractions
