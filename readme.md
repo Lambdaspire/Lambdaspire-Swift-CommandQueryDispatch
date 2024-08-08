@@ -4,7 +4,7 @@ A lightweight Command Query Dispatch package for Swift.
 
 You may also know this pattern as Command Query Responsibility Segregation / Separation (CQRS) or more simply Command Query Segregation / Separation (CQS).
 
-Atomise your business logic and separate mutation from inquiry.
+Atomise your business logic and orchestration, maximise testability, and separate mutation from inquiry.
 
 ## Usage
 
