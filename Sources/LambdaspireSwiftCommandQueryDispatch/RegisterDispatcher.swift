@@ -44,11 +44,3 @@ public class CommanQueryDispatchRegistrator {
             queryHandlers.forEach { handler($0) }
         }
 }
-
-struct CommandHandler<T: CQDCommand> {
-    var handle: (T) async throws -> Void
-}
-
-struct QueryHandler<T: CQDQuery> {
-    var handle: (T) async throws -> T.Value
-}

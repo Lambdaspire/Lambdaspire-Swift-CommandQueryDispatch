@@ -17,3 +17,11 @@ class StandardCommandQueryDispatcher : CommandQueryDispatcher, Resolvable {
         try await scope.resolve(QueryHandler<T>.self).handle(query)
     }
 }
+
+struct CommandHandler<T: CQDCommand> {
+    var handle: (T) async throws -> Void
+}
+
+struct QueryHandler<T: CQDQuery> {
+    var handle: (T) async throws -> T.Value
+}
