@@ -13,7 +13,7 @@ open class CommandHandler<T: CQDCommand> : HandlesCommand {
     
     public typealias TCommand = T
     
-    public func handle(_ : T) async throws { }
+    open func handle(_ : T) async throws { }
     
     public static func register(_ registry: any DependencyRegistry) {
         registry.transient(CommandHandler<T>.self, assigned(Self.self))

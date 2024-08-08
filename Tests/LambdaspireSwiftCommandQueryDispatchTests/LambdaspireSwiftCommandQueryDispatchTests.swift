@@ -2,7 +2,7 @@ import XCTest
 import LambdaspireAbstractions
 import LambdaspireDependencyResolution
 import LambdaspireSwiftCommandQueryDispatch
-@testable import LambdaspireSwiftCommandQueryDispatch
+import LambdaspireSwiftCommandQueryDispatch
 
 final class LambdaspireSwiftCommandQueryDispatchTests: XCTestCase {
     
@@ -16,9 +16,10 @@ final class LambdaspireSwiftCommandQueryDispatchTests: XCTestCase {
         
         b.singleton(TestValueCallback<Int>.self) { { valueModifiedByCommand = $0 } }
         
-        b.commandQueryDispatch().standard(
-            commandHandlers: [TestCommandHandler.self],
-            queryHandlers: [TestQueryHandler.self])
+        b.commandQueryDispatch()
+            .standard(
+                commandHandlers: [TestCommandHandler.self],
+                queryHandlers: [TestQueryHandler.self])
         
         let c = b.build()
         

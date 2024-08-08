@@ -14,7 +14,7 @@ public protocol HandlesQuery {
 open class QueryHandler<T: CQDQuery> : HandlesQuery {
     public typealias TQuery = T
     
-    public func handle(_ : TQuery) async throws -> TQuery.Value {
+    open func handle(_ : TQuery) async throws -> TQuery.Value {
         fatalError("This must be overridden. Sorry.")
     }
     

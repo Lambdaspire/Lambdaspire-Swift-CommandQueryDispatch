@@ -167,3 +167,192 @@ builder.transient { MySuperSpecialUniqueDispatcher(handlers: .whatever) }
 ```
 
 It probably doesn't make a lot of sense to use this package if you're going to do this for production code, but it might be useful for test / preview scenarios.
+
+### SwiftData
+
+There's no reason you can't use SwiftData with this. You just need to find a way to inject a suitable `ModelContext` into your handlers.
+
+Here's an naive end-to-end example using a few other Lambdaspire packages:
+
+```swift
+
+import SwiftUI
+import SwiftData
+import LambdaspireAbstractions
+import LambdaspireSwiftUIFoundations
+import LambdaspireDependencyResolution
+import LambdaspireSwiftCommandQueryDispatch
+
+@main
+struct MyApp: App {
+    
+    private let modelContainer = getModelContainer()
+    
+    var body: some Scene {
+        WindowGroup {
+            IoCBootstrapperView {
+                NavigationStack {
+                    RootView()
+                }
+            }
+        }
+        .modelContainer(modelContainer)
+    }
+}
+
+// ...
+
+func getModelContainer() -> ModelContainer {
+    
+    let schema = Schema([
+        SomeEntity.self
+    ])
+    
+    let modelConfiguration = ModelConfiguration(
+        schema: schema,
+        isStoredInMemoryOnly: false,
+        cloudKitDatabase: .private("iCloud.com.example.whatever"))
+
+    return try! ModelContainer(
+        for: schema,
+        configurations: [modelConfiguration])
+}
+
+
+// ...
+
+struct IoCBootstrapperView<Content: View> : View {
+    
+    var content: () -> Content
+    
+    @State private var rootScope: DependencyResolutionScope?
+    
+    @Environment(\.modelContext) private var modelContext
+    
+    var body: some View {
+        if let rootScope {
+            content()
+                .resolving(from: rootScope)
+        } else {
+            ProgressView()
+                .task {
+                    rootScope = getAppContainer(modelContext)
+                }
+        }
+    }
+}
+
+// ...
+
+func getAppContainer(_ modelContext: ModelContext) -> Container {
+    let b: ContainerBuilder = .init()
+    
+    // SwiftData
+    b.transient { modelContext }
+    
+    // Dispatcher
+    b.commandQueryDispatch().standard(
+        commandHandlers: [
+            AddEntityCommandHandler.self
+        ],
+        queryHandlers: [
+            GetRandomEntityQueryHandler.self
+        ])
+    
+    // Scope
+    b.transient { $0 }
+    
+    return b.build()
+}
+
+// ...
+
+@Model
+class SomeEntity {
+    
+    var name: String = ""
+    
+    init(name: String = "") {
+        self.name = name
+    }
+}
+
+// ...
+
+struct AddEntityCommand : CQDCommand { }
+
+@Resolvable
+class AddEntityCommandHandler : CommandHandler<AddEntityCommand> {
+    
+    private let modelContext: ModelContext
+    
+    override func handle(_ command: AddEntityCommand) async throws {
+        modelContext.insert(SomeEntity(name: "Entity \(Int.random(in: 100...999))"))
+        try! modelContext.save()
+    }
+}
+
+// ...
+
+struct GetRandomEntityQuery : CQDQuery {
+    typealias Value = SomeEntity
+}
+
+@Resolvable
+class GetRandomEntityQueryHandler : QueryHandler<GetRandomEntityQuery> {
+    
+    private let modelContext: ModelContext
+    
+    override func handle(_ query: GetRandomEntityQuery) async throws -> SomeEntity {
+        guard let result = try modelContext.fetch(FetchDescriptor<SomeEntity>()).first else {
+            throw DomainError.notFound
+        }
+        return result
+    }
+}
+
+// ...
+
+@ResolvedScope
+struct RootView : View {
+
+    @State private var random: SomeEntity?
+
+    @Resolved private var dispatcher: CommandQueryDispatcher
+    
+    @Query private var entities: [SomeEntity]
+
+    var body: some View {
+        List {
+            ForEach(entities, id: \.persistentModelID) { e in
+                Text(e.name)
+            }
+        }
+        .sheet(item: $random) { r in
+            Text("Random: \(r.name)")
+        }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    Task {
+                        try! await dispatcher.dispatch(AddEntityCommand())
+                    }
+                } label: {
+                    Text("Add")
+                }
+            }
+            
+            ToolbarItem(placement: .secondaryAction) {
+                Button {
+                    Task { @MainActor in
+                        random = try! await dispatcher.dispatch(GetRandomEntityQuery())
+                    }
+                } label: {
+                    Text("View Random")
+                }
+            }
+        }
+    }
+}
+
+```
