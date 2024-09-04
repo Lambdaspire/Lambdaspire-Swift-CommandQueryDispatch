@@ -1,19 +1,19 @@
 
 import LambdaspireAbstractions
 
-class StandardCommandQueryDispatcher : CommandQueryDispatcher, Resolvable {
+public class StandardCommandQueryDispatcher : CommandQueryDispatcher, Resolvable {
     
     private let scope: DependencyResolutionScope
     
-    required init(scope: DependencyResolutionScope) {
+    public required init(scope: DependencyResolutionScope) {
         self.scope = scope
     }
     
-    func dispatch<T>(_ command: T) async throws where T : CQDCommand {
+    public func dispatch<T>(_ command: T) async throws where T : CQDCommand {
         try await scope.resolve(CommandHandler<T>.self).handle(command)
     }
     
-    func dispatch<T>(_ query: T) async throws -> T.Value where T : CQDQuery {
+    public func dispatch<T>(_ query: T) async throws -> T.Value where T : CQDQuery {
         try await scope.resolve(QueryHandler<T>.self).handle(query)
     }
 }
